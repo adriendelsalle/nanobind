@@ -125,7 +125,7 @@ static PyType_Slot nb_func_slots[] = {
     { Py_tp_traverse, (void *) nb_func_traverse },
     { Py_tp_clear, (void *) nb_func_clear },
     { Py_tp_dealloc, (void *) nb_func_dealloc },
-    { Py_tp_traverse, (void *) nb_func_traverse},
+    { Py_tp_traverse, (void *) nb_func_traverse },
     { Py_tp_new, (void *) PyType_GenericNew },
     { Py_tp_call, (void *) PyVectorcall_Call },
     { 0, nullptr }
@@ -478,6 +478,7 @@ static void internals_make() {
 
     register_exception_translator(default_exception_translator, nullptr);
 
+#if !defined(PYPY_VERSION)
     /* The implementation of typing.py tends to introduce spurious reference
        leaks that upset nanobind's leak checker. The following band-aid,
        installs an 'atexit' handler that clears LRU caches used in typing.py.
@@ -509,7 +510,6 @@ static void internals_make() {
         PyErr_Clear();
     }
 
-#if !defined(PYPY_VERSION)
     // Install the memory leak checker
     if (Py_AtExit(internals_cleanup))
         fprintf(stderr,
